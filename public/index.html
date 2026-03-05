@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo APP</title>
+</head>
+<body>
+    <!DOCTYPE html>
+<html>
+<head>
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>Professional Todo App</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+    }
+
+    .container {
+      background: white;
+      width: 400px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .input-section {
+      display: flex;
+      margin-bottom: 15px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px 0 0 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .add-btn {
+      background: #4CAF50;
+      color: white;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .task {
+      background: #f4f4f4;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.3s;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .delete-btn {
+      background: red;
+      color: white;
+      border-radius: 4px;
+      padding: 5px 8px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>My Todo App</h1>
+
+  <div class="input-section">
+    <input type="text" id="taskInput" placeholder="Enter task">
+    <button class="add-btn" onclick="addTask()">Add</button>
+  </div>
+
+  <div id="taskList"></div>
+</div>
+
+<script>
+  async function loadTasks() {
+    const response = await fetch("/tasks");
+    const tasks = await response.json();
+
+    const list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    tasks.forEach(task => {
+      const taskDiv = document.createElement("div");
+      taskDiv.className = "task";
+      if (task.completed) taskDiv.classList.add("completed");
+
+      taskDiv.innerHTML = `
+        <span onclick="toggleComplete(${task.id})">${task.task}</span>
+        <button class="delete-btn" onclick="deleteTask(${task.id})">X</button>
+      `;
+
+      list.appendChild(taskDiv);
+    });
+  }
+
+  async function addTask() {
+    const input = document.getElementById("taskInput");
+    const task = input.value;
+
+    if (!task) return;
+
+    await fetch("/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task })
+    });
+
+    input.value = "";
+    loadTasks();
+  }
+
+  async function deleteTask(id) {
+    await fetch(`/delete/${id}`, { method: "DELETE" });
+    loadTasks();
+  }
+
+  async function toggleComplete(id) {
+    await fetch(`/complete/${id}`, { method: "PUT" });
+    loadTasks();
+  }
+
+  loadTasks();
+</script>
+
+</body>
+</html>
